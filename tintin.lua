@@ -363,6 +363,10 @@ local function setup_midi_in()
     local ch_param = params:get("midi_in_ch")
     if ch_param > 1 and msg.ch ~= ch_param - 1 then return end
 
+    -- ignore if midi in and out are the same device (feedback loop)
+    if params:get("midi_in_device") == params:get("midi_out_device") and
+       (params:get("m_source") == 2 or params:get("t_source") == 2) then return end
+
     if msg.type == "note_on" and msg.vel > 0 then
       local m_note = quantize_to_scale(msg.note)
       local t_note = get_t_note(m_note)
