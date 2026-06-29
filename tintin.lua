@@ -24,22 +24,19 @@ engine.name = "PolyPerc"
 local nb = include 'tintin/lib/nb'
 local has_nb = true
 local Pt = require 'pattern_time'
+local musicutil = require 'musicutil'
 
 local g = grid.connect()
 
--- -------------------------------------------------------
--- scale definitions (intervals from root, in semitones)
--- -------------------------------------------------------
-local SCALES = {
-  { name = "Major",        intervals = {0,2,4,5,7,9,11} },
-  { name = "Natural Minor",intervals = {0,2,3,5,7,8,10} },
-  { name = "Dorian",       intervals = {0,2,3,5,7,9,10} },
-  { name = "Phrygian",     intervals = {0,1,3,5,7,8,10} },
-  { name = "Lydian",       intervals = {0,2,4,6,7,9,11} },
-  { name = "Mixolydian",   intervals = {0,2,4,5,7,9,10} },
-  { name = "Pentatonic",   intervals = {0,2,4,7,9}       },
-  { name = "Minor Penta",  intervals = {0,3,5,7,10}      },
-}
+-- build SCALES from musicutil, stripping the trailing octave (12) from intervals
+local SCALES = {}
+for _, s in ipairs(musicutil.SCALES) do
+  local ivs = {}
+  for _, v in ipairs(s.intervals) do
+    if v < 12 then ivs[#ivs+1] = v end
+  end
+  SCALES[#SCALES+1] = {name = s.name, intervals = ivs}
+end
 
 local NOTE_NAMES = {"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"}
 
@@ -118,7 +115,7 @@ local function setup_params()
   params:add_separator("TINTINNABULI")
 
   params:add_option("scale", "Scale",
-    (function() local t={} for _,s in ipairs(SCALES) do t[#t+1]=s.name end return t end)(), 2)
+    (function() local t={} for _,s in ipairs(SCALES) do t[#t+1]=s.name end return t end)(), 3)
 
   params:add_option("int_y", "Row Interval (degrees)", {"4", "5"}, 2)
 
