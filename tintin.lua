@@ -711,7 +711,7 @@ function redraw()
   local m_rows = {
     scale_abbr,
     NOTE_NAMES[(bn % 12) + 1] .. (math.floor(bn / 12) - 1),
-    "sus " .. string.format("%.1f", sus) .. "s",
+    sus_hold and "sus full" or "sus " .. string.format("%.1f", sus) .. "s",
   }
 
   local t_rows = {
