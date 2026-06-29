@@ -115,7 +115,8 @@ local function setup_params()
   params:add_separator("TINTINNABULI")
 
   params:add_option("scale", "Scale",
-    (function() local t={} for _,s in ipairs(SCALES) do t[#t+1]=s.name end return t end)(), 3)
+    (function() local t={} for _,s in ipairs(SCALES) do t[#t+1]=s.name end return t end)(),
+    (function() for i,s in ipairs(SCALES) do if s.name == "Natural Minor" then return i end end return 1 end)())
 
   params:add_option("int_y", "Row Interval (degrees)", {"4", "5"}, 2)
 
@@ -688,7 +689,7 @@ function redraw()
 
   local bn         = params:get("base_note")
   local scale_name = SCALES[params:get("scale")].name
-  local scale_abbr = #scale_name > 10 and (string.sub(scale_name, 1, 9) .. ".") or scale_name
+  local scale_abbr = #scale_name > 10 and (string.gsub(string.sub(scale_name, 1, 9), "%s+$", "") .. ".") or scale_name
   local dms        = params:get("t_delay")
   local t_oct      = params:get("t_octave_shift")
 
