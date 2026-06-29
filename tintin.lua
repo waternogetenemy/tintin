@@ -622,7 +622,7 @@ g.key = function(col, row, z)
       if sus_hold then
         engine.release(30)
       else
-        engine.release(params:get("sustain"))
+        engine.release(4.0)
       end
       grid_redraw()
       return
