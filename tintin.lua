@@ -97,6 +97,7 @@ local screen_cursor = 1  -- selected row in screen columns (1-4)
 local held = {}          -- held[col][row] = true/false
 local t_position = 3   -- 1=2dn, 2=1dn, 3=1up, 4=2up
 local t_delay_ms = 0   -- ms delay before t-voice triggers (0 = immediate)
+local sus_hold = false -- hold mode: notes sustain indefinitely
 local last_m_note = nil
 local last_t_note = nil
 -- pattern recorder (4 slots, cols 9-12 row 1)
@@ -374,7 +375,7 @@ local function setup_midi_in()
       note_on(m_note, false, vel)
       local delay_s = params:get("t_delay") / 1000
       local t_src = params:get("t_source")
-      local length_s = params:get("sustain")
+      local length_s = sus_hold and 300 or params:get("sustain")
       if delay_s <= 0 then
         note_on(t_note, true, vel)
         if t_src == 2 or (has_nb and t_src == 3) then
@@ -424,7 +425,7 @@ local function trigger_note(col, row)
   note_on(m_note, false, vel)
 
   local delay_s = params:get("t_delay") / 1000
-  local length_s = params:get("sustain")
+  local length_s = sus_hold and 300 or params:get("sustain")
   local m_src = params:get("m_source")
   local t_src = params:get("t_source")
 
@@ -486,14 +487,14 @@ local function grid_redraw()
     g:led(col, T_DELAY_ROW, brightness)
   end
 
-  -- row 3: sustain bar (cols 1-16 = 50ms to 2000ms)
-  -- for polyperc: maps to engine.sustain (0.0-1.0)
-  -- for midi: maps to note_length
+  -- row 3: sustain bar cols 1-15, col 16 = hold mode
   local sustain_v = params:get("sustain")  -- 0.1 to 4.0
-  local sustain_col = math.floor((sustain_v - 0.1) / 3.9 * 15 + 0.5) + 1
-  for col = 1, GRID_COLS do
+  local sustain_col = math.floor((sustain_v - 0.1) / 3.9 * 14 + 0.5) + 1
+  for col = 1, 15 do
     local brightness
-    if col < sustain_col then
+    if sus_hold then
+      brightness = 2
+    elseif col < sustain_col then
       brightness = 4
     elseif col == sustain_col then
       brightness = 15
@@ -502,6 +503,7 @@ local function grid_redraw()
     end
     g:led(col, T_SUSTAIN_ROW, brightness)
   end
+  g:led(16, T_SUSTAIN_ROW, sus_hold and 15 or 3)
 
   -- col 1, rows 5-8: t-voice position (2dn, 1dn, 1up, 2up)
   local t_pos = params:get("t_position")
@@ -615,8 +617,18 @@ g.key = function(col, row, z)
     grid_redraw()
 
   elseif row == T_SUSTAIN_ROW then
-    -- sustain: col 1=0.1s, col 16=4.0s
-    local v = 0.1 + (col - 1) / 15 * 3.9
+    if col == 16 then
+      sus_hold = not sus_hold
+      if sus_hold then
+        engine.release(30)
+      else
+        engine.release(params:get("sustain"))
+      end
+      grid_redraw()
+      return
+    end
+    -- sustain: col 1=0.1s, col 15=4.0s
+    local v = 0.1 + (col - 1) / 14 * 3.9
     params:set("sustain", v)
     redraw()
     grid_redraw()
@@ -809,7 +821,7 @@ function init()
       last_t_note = t_note
       note_on(e.note, false, e.vel)
       local delay_s = params:get("t_delay") / 1000
-      local length_s = params:get("sustain")
+      local length_s = sus_hold and 300 or params:get("sustain")
       local m_src = params:get("m_source")
       local t_src = params:get("t_source")
 
