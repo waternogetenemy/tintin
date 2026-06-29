@@ -637,7 +637,7 @@ g.key = function(col, row, z)
 
   elseif row >= KEYBOARD_TOP_ROW then
     if col == 1 then
-      -- t-voice position (rows 5-8 = 1dn2, 1dn, 1up, 2up)
+      -- t-voice position (rows 5-8 = 2dn, 1dn, 1up, 2up)
       if row >= 5 and row <= 8 then
         t_position = 9 - row
         params:set("t_position", t_position)
