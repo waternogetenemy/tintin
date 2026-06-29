@@ -628,6 +628,7 @@ g.key = function(col, row, z)
       return
     end
     -- sustain: col 1=0.1s, col 15=4.0s
+    sus_hold = false
     local v = 0.1 + (col - 1) / 14 * 3.9
     params:set("sustain", v)
     redraw()
