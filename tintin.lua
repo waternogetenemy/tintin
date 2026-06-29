@@ -312,6 +312,7 @@ local function note_on(midi_note, is_t_voice, vel)
   vel = vel or 100
   local src = params:get(is_t_voice and "t_source" or "m_source")
   if src == 1 then
+    engine.release(sus_hold and 30 or params:get("sustain"))
     engine.amp(params:get("amp") * (vel / 127))
     engine.hz(midi_to_hz(midi_note))
   elseif src == 2 then
