@@ -632,6 +632,7 @@ g.key = function(col, row, z)
       else
         engine.release(4.0)
       end
+      redraw()
       grid_redraw()
       return
     end
