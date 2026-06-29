@@ -172,7 +172,8 @@ local function setup_params()
   end
 
   params:add_number("midi_out_device", "MIDI Out Device", 1, 4, 1)
-  params:add_number("midi_out_ch", "MIDI Out Channel", 1, 16, 1)
+  params:add_number("midi_out_ch_m", "MIDI Out Ch (M)", 1, 16, 1)
+  params:add_number("midi_out_ch_t", "MIDI Out Ch (T)", 1, 16, 2)
 
   params:add_separator("MIDI INPUT")
   local ch_names = {"any"}
@@ -317,7 +318,8 @@ local function note_on(midi_note, is_t_voice, vel)
     engine.hz(midi_to_hz(midi_note))
   elseif src == 2 then
     if midi_out then
-      midi_out:note_on(midi_note, vel, params:get("midi_out_ch"))
+      local ch = params:get(is_t_voice and "midi_out_ch_t" or "midi_out_ch_m")
+      midi_out:note_on(midi_note, vel, ch)
     end
   elseif has_nb and src == 3 then
     local voice_id = is_t_voice and "t_voice" or "m_voice"
@@ -330,7 +332,8 @@ local function note_off(midi_note, is_t_voice)
   local src = params:get(is_t_voice and "t_source" or "m_source")
   if src == 2 then
     if midi_out then
-      midi_out:note_off(midi_note, 0, params:get("midi_out_ch"))
+      local ch = params:get(is_t_voice and "midi_out_ch_t" or "midi_out_ch_m")
+      midi_out:note_off(midi_note, 0, ch)
     end
   elseif has_nb and src == 3 then
     local voice_id = is_t_voice and "t_voice" or "m_voice"
