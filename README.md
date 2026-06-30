@@ -9,6 +9,10 @@ Notes can be played via a monome grid, a MIDI controller, or looped using the bu
 
 ![Norns screen](images/screen_tintin.png)
 
+Long time listener, first time caller. I've had a Norns Shield and/or Monome Norns for 5 or 6 years now, and have delighted in the weird inventive brilliance of this community. Finally I decided - with the very considerable help of Claude Code, and looking at many other superb scripts - to try to build one myself.
+
+Keen for any feedback/thoughts/requests - will hopefully get a chance to create a video once we get to v1.0, in the meantime, a few audio examples:
+
 ---
 
 ## Requirements
