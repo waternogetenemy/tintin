@@ -176,6 +176,7 @@ local function setup_params()
   params:add_number("midi_out_ch_t", "MIDI Out Ch (T)", 1, 16, 2)
 
   params:add_separator("MIDI INPUT")
+  params:add_option("midi_in_enabled", "MIDI In", {"off", "on"}, 1)
   local ch_names = {"any"}
   for i = 1, 16 do ch_names[#ch_names+1] = tostring(i) end
   params:add_number("midi_in_device", "MIDI In Device", 1, 4, 1)
@@ -362,6 +363,7 @@ local function setup_midi_in()
   if midi_in_dev then midi_in_dev.event = nil end
   midi_in_dev = midi.connect(params:get("midi_in_device"))
   midi_in_dev.event = function(data)
+    if params:get("midi_in_enabled") == 1 then return end
     local msg = midi.to_msg(data)
     local ch_param = params:get("midi_in_ch")
     if ch_param > 1 and msg.ch ~= ch_param - 1 then return end
@@ -898,6 +900,7 @@ function init()
   end)
   params:set_action("midi_out_device", function(_) setup_midi() end)
   params:set_action("midi_in_device", function(_) setup_midi_in() end)
+  params:set_action("midi_in_enabled", function(_) setup_midi_in() end)
 
   engine.amp(params:get("amp"))
   engine.release(params:get("release"))
