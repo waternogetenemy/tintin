@@ -7,6 +7,8 @@ A [Norns](https://monome.org/docs/norns/) script implementing [Arvo Pärt's tint
 
 Notes can be played via a monome grid, a MIDI controller, or looped using the built-in pattern recorder.
 
+[![Arvo Pärt - Spiegel im Spiegel](https://img.youtube.com/vi/m6xEktSFhe0/0.jpg)](https://www.youtube.com/watch?v=m6xEktSFhe0)
+
 ![Norns screen](images/screen_tintin.png)
 
 Long time listener, first time caller. I've had a Norns Shield and/or Monome Norns for 5 or 6 years now, and have delighted in the weird inventive brilliance of this community. Finally I decided - with the very considerable help of Claude Code, and looking at many other superb scripts - to try to build one myself.
