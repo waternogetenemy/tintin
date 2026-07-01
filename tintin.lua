@@ -572,7 +572,13 @@ g.key = function(col, row, z)
           patterns[i]:stop()
           pat_state[i] = 4
         elseif s == 4 then
-          -- stopped: resume
+          -- stopped: resume — stop any other playing pattern first
+          for j = 1, 8 do
+            if j ~= i and pat_state[j] == 3 then
+              patterns[j]:stop()
+              pat_state[j] = 4
+            end
+          end
           patterns[i]:start()
           pat_state[i] = 3
         end
@@ -596,14 +602,18 @@ g.key = function(col, row, z)
       local i = col - 8
       pat_shortpress[i] = true
       if pat_timer[i] then clock.cancel(pat_timer[i]) end
+      -- stop any other playing pattern first
+      for j = 1, 8 do
+        if j ~= i and pat_state[j] == 3 then
+          patterns[j]:stop()
+          pat_state[j] = 4
+        end
+      end
       if pat_state[i] == 1 then
         patterns[i]:rec_start()
         pat_state[i] = 2
         pat_active = i
         pat_just_started[i] = true
-        -- immediate mode: capture the silence before the first note by
-        -- anchoring the loop with a rest event at the moment of the press.
-        -- "on first note" mode skips this, so the loop begins at note 1.
         if params:get("pat_rec_mode") == 1 then
           patterns[i]:watch({rest = true})
         end
