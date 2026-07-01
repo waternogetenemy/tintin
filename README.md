@@ -15,6 +15,12 @@ Keen for any feedback/thoughts/requests - will hopefully get a chance to create 
 
 ---
 
+## LLM disclosure
+
+I have virtually no experience writing code - Claude Code was absolutely instrumental in building this, alongside trying to understand basic concepts through looking at existing scripts (eg. sonocircuit's wonderful [sidvagn](https://github.com/sonocircuit/sidvagn)).
+
+---
+
 ## Requirements
 
 - [Norns](https://monome.org/docs/norns/) (any version)
