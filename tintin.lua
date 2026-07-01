@@ -105,6 +105,7 @@ local last_t_note = nil
 local patterns       = {}
 local pat_state      = {1, 1, 1, 1, 1, 1, 1, 1}
 local pat_active     = 0
+local pat_armed      = {false, false, false, false, false, false, false, false}
 local pat_timer      = {}
 local pat_shortpress = {true, true, true, true, true, true, true, true}
 local pat_just_started = {false, false, false, false, false, false, false, false}
@@ -120,6 +121,8 @@ local function setup_params()
     (function() for i,s in ipairs(SCALES) do if s.name == "Natural Minor" then return i end end return 1 end)())
 
   params:add_option("int_y", "Row Interval (degrees)", {"4", "5"}, 2)
+
+  params:add_option("pat_rec_mode", "Pattern Record", {"immediate", "on first note"}, 1)
 
   params:add_number("base_note", "base_note", 0, 127, 36)
   params:hide("base_note")
@@ -380,6 +383,12 @@ local function setup_midi_in()
       last_m_note = m_note
       last_t_note = t_note
       if pat_active > 0 then
+        if pat_armed[pat_active] then
+          pat_armed[pat_active] = false
+          patterns[pat_active]:rec_start()
+          pat_state[pat_active] = 2
+          grid_redraw()
+        end
         patterns[pat_active]:watch({note = m_note, vel = vel})
       end
       note_on(m_note, false, vel)
@@ -429,6 +438,12 @@ local function trigger_note(col, row)
   local vel = math.random(params:get("vel_min"), params:get("vel_max"))
 
   if pat_active > 0 then
+    if pat_armed[pat_active] then
+      pat_armed[pat_active] = false
+      patterns[pat_active]:rec_start()
+      pat_state[pat_active] = 2
+      grid_redraw()
+    end
     patterns[pat_active]:watch({note = m_note, vel = vel})
   end
 
@@ -474,7 +489,12 @@ local function grid_redraw()
   -- row 1, cols 9-16: pattern slots (1-4 on cols 9-12, 5-8 on cols 13-16)
   for i = 1, 8 do
     local s = pat_state[i]
-    local brightness = s == 1 and 2 or (s == 2 and 15 or (s == 3 and 8 or 4))
+    local brightness
+    if pat_armed[i] then
+      brightness = 6  -- armed: waiting for first note
+    else
+      brightness = s == 1 and 2 or (s == 2 and 15 or (s == 3 and 8 or 4))
+    end
     g:led(i + 8, T_POS_ROW, brightness)
   end
 
@@ -554,6 +574,13 @@ g.key = function(col, row, z)
     if row == T_POS_ROW and col >= 9 and col <= 16 then
       local i = col - 8
       if pat_timer[i] then clock.cancel(pat_timer[i]) pat_timer[i] = nil end
+      if pat_armed[i] then
+        -- key-up while armed: cancel arming
+        pat_armed[i] = false
+        pat_active = 0
+        grid_redraw()
+        return
+      end
       if pat_just_started[i] then
         -- ignore key-up from the press that started recording
         pat_just_started[i] = false
@@ -595,11 +622,17 @@ g.key = function(col, row, z)
       pat_shortpress[i] = true
       if pat_timer[i] then clock.cancel(pat_timer[i]) end
       if pat_state[i] == 1 then
-        -- empty: start recording immediately on key down
-        patterns[i]:rec_start()
-        pat_state[i] = 2
-        pat_active = i
-        pat_just_started[i] = true
+        if params:get("pat_rec_mode") == 2 then
+          -- arm: wait for first note before recording
+          pat_armed[i] = true
+          pat_active = i
+        else
+          -- immediate: start recording now
+          patterns[i]:rec_start()
+          pat_state[i] = 2
+          pat_active = i
+          pat_just_started[i] = true
+        end
         grid_redraw()
       else
         -- non-empty: start hold timer to detect clear
