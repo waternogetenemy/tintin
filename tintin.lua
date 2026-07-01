@@ -442,6 +442,7 @@ local function trigger_note(col, row)
       pat_armed[pat_active] = false
       patterns[pat_active]:rec_start()
       pat_state[pat_active] = 2
+      pat_just_started[pat_active] = true
       grid_redraw()
     end
     patterns[pat_active]:watch({note = m_note, vel = vel})
