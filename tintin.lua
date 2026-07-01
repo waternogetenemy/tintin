@@ -575,9 +575,7 @@ g.key = function(col, row, z)
       local i = col - 8
       if pat_timer[i] then clock.cancel(pat_timer[i]) pat_timer[i] = nil end
       if pat_armed[i] then
-        -- key-up while armed: cancel arming
-        pat_armed[i] = false
-        pat_active = 0
+        -- key-up while armed: stay armed, waiting for first note
         grid_redraw()
         return
       end
