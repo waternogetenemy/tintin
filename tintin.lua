@@ -918,11 +918,15 @@ function init()
   params.action_write = function(filename, name, number)
     local data = {}
     for i = 1, 8 do
-      data[i] = {state = pat_state[i], duration = patterns[i].duration, events = {}}
-      for j, e in ipairs(patterns[i].data) do
-        data[i].events[j] = {time = e.time, note = e.event.note, vel = e.event.vel}
+      local p = patterns[i]
+      data[i] = {state = pat_state[i], count = p.count, events = {}, times = {}}
+      for j = 1, p.count do
+        local e = p.event[j]
+        data[i].events[j] = {note = e.note, vel = e.vel, rest = e.rest}
+        data[i].times[j] = p.time[j]
       end
     end
+    util.make_dir(_path.data .. "tintin")
     tab.save(data, _path.data .. "tintin/patterns_" .. number .. ".data")
   end
 
@@ -932,14 +936,21 @@ function init()
       local data = tab.load(_path.data .. "tintin/patterns_" .. number .. ".data")
       if not data then return end
       for i = 1, 8 do
-        if data[i] and data[i].state > 1 then
-          patterns[i].data = {}
-          for j, e in ipairs(data[i].events) do
-            patterns[i].data[j] = {time = e.time, event = {note = e.note, vel = e.vel}}
+        patterns[i]:stop()
+        patterns[i]:clear()
+        pat_state[i] = 1
+        local d = data[i]
+        if d and d.state and d.state > 1 and d.count and d.count > 0 then
+          local p = patterns[i]
+          for j = 1, d.count do
+            local e = d.events[j]
+            p.event[j] = {note = e.note, vel = e.vel, rest = e.rest}
+            p.time[j] = d.times[j] or 0.5
           end
-          patterns[i].duration = data[i].duration
-          pat_state[i] = (data[i].state == 2) and 4 or data[i].state
-          if pat_state[i] == 3 then patterns[i]:start() end
+          p.count = d.count
+          -- a pattern saved mid-record can't resume recording; keep it stopped
+          pat_state[i] = (d.state == 2) and 4 or d.state
+          if pat_state[i] == 3 then p:start() end
         end
       end
       grid_redraw()
