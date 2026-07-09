@@ -136,13 +136,17 @@ Each voice (M and T) can use a different sound source, set independently in para
 
 Eight pattern slots (grid row 1, cols 9–16):
 
-- **Press an empty slot** — starts recording immediately (including silence)
+- **Press an empty slot** — starts recording; loop begins from your first note (no leading silence)
 - **Press again** — stops recording and starts looping
 - **Press a playing pattern** — stops it
-- **Press a stopped pattern** — resumes it
+- **Press a stopped pattern** — resumes it (any other playing pattern stops automatically)
 - **Hold any slot** — clears it
 
-Patterns are saved with psets and restored on load.
+Only one pattern plays at a time. Patterns are saved with psets and restored on load.
+
+The **Pattern Record** param offers two modes:
+- **on first note** (default) — the loop length starts from your first played note
+- **immediate** — the loop length starts from the moment you press the slot, capturing any silence before your first note
 
 ---
 
@@ -158,6 +162,7 @@ Connect a MIDI controller and set the MIDI In Device in params. Incoming notes a
 
 | Param | Description |
 |-------|-------------|
+| Pattern Record | on first note / immediate (see Pattern recorder section) |
 | Scale | Scale selection (full musicutil set) |
 | Row Interval | Degrees per row on the grid keyboard (4 or 5) |
 | Bottom-Left Note | Root note / octave of the grid keyboard |
